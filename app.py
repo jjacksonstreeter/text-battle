@@ -19,28 +19,34 @@ def load_scoreboard():
         pass
     return []
 
+
 def save_score(player: str, score: int):
+    # Ensure folders exist
+    SCOREBOARD_PATH_CSV.parent.mkdir(parents=True, exist_ok=True)
+
     sb = load_scoreboard()
     sb.append({"player": player or "Player", "score": int(score)})
     sb = sorted(sb, key=lambda x: x["score"], reverse=True)[:10]  # keep top 10
-    # write JSON
+
+    # Write JSON (local persistence)
     try:
-        with open(SCOREBOARD_PATH_JSON, 'w', encoding='utf-8') as f:
-            json.dump(sb, f, indent=2)
+        with open(SCOREBOARD_PATH_JSON, "w", encoding="utf-8") as jf:
+            json.dump(sb, jf, indent=2)
     except Exception:
-        st.warning("Could not write scoreboard.json (ephemeral storage in cloud).")
-    # write CSV (appears in GitHub Pages if committed)
-    try:
-        SCOREBOARD_PATH_CSV.parent.mkdir(parents=True, exist_ok=True)
-        with open(SCOREBOARD_PATH_CSV, 'w', encoding='utf-8') as f:
-            f.write('player,score
-')
+        st.warning("Could not write scoreboard.json in this environment.")
+
+    # Write CSV (for Pages / manual download)
+
+try:
+        with open(SCOREBOARD_PATH_CSV, "w", encoding="utf-8") as cf:
+            cf.write("player,score\n")
             for row in sb:
-                f.write(f"{row['player']},{row['score']}
-")
+                cf.write(f"{row['player']},{row['score']}\n")
     except Exception:
         pass
+
     return sb
+
 
 # ---------------- Game logic ----------------
 def init_state():
